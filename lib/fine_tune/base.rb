@@ -2,19 +2,23 @@ module FineTune
   class Base
     include Singleton
 
-    attr_accessor :adapter
+    class << self; attr_accessor :default_strategy; end
+
+    @@registry = {
+      :leaky_bucket => ::FineTune::Strategies::LeakyBucket,
+      :sliding_window => ::FineTune::Strategies::SlidingWindow
+    }
+    @default_strategy = ::FineTune::Strategies::LeakyBucket
 
     def throttle(name, id, options)
       strategy, key, options = current_strategy(name, id, options)
       count = strategy.increment(key, options)
+      comp = strategy.compare?(count, options)
 
-      throttled = strategy.compare?(count, options)
+      yield(count, key, strategy, options) if block_given?
 
-      yield(count, key, strategy, options) if throttled && block_given?
-
-      throttled
+      comp >= 0
     end
-
 
     def throttle!(name, id, options)
       block = Proc.new if block_given?
@@ -27,7 +31,17 @@ module FineTune
 
     def rate_exceeded?(name, id, options)
       strategy, key, options = current_strategy(name, id, options)
-      strategy.compare?(strategy.count(key, options), options)
+      strategy.compare?(strategy.count(key, options), options) >= 0
+    end
+
+    def count(name, id, options)
+      strategy, key, options = current_strategy(name, id, options)
+      strategy.count(key, options)
+    end
+
+    def reset(name, id, options)
+      strategy, key, options = current_strategy(name, id, options)
+      strategy.reset(key, options)
     end
 
     def add_limit(name, options = {})
@@ -39,16 +53,6 @@ module FineTune
       limits.delete(name)
     end
 
-    def reset(name, id)
-      strategy, key, options = current_strategy(name, id, options)
-      strategy.reset(key, options)
-    end
-
-    def count(name, id)
-      strategy, key, options = current_strategy(name, id, options)
-      strategy.count(key, options)
-    end
-
     def limits
       @limits ||= {}
     end
@@ -56,8 +60,7 @@ module FineTune
     private
     def current_strategy(name, id, options)
       options = (limits[name] || {}).merge(options)
-      strategy = ::FineTune::Strategies.Base.registry.fetch(options[:strategy],
-                                        ::FineTune::Strategies.LeakyBucket)
+      strategy = self.class.find_strategy(options[:strategy])
 
       if strategy.validate?(options)
         key = strategy.build_key(name, id, options)
@@ -66,6 +69,14 @@ module FineTune
       raise "resource key undefined" unless key
 
       [strategy, key, options]
+    end
+
+    def self.find_strategy(strategy)
+      registry.fetch(strategy, default_strategy).instance
+    end
+
+    def self.registry
+      @@registry
     end
   end
 end

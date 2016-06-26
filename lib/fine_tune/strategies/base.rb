@@ -3,11 +3,6 @@ module FineTune
     class Base
       include Singleton
 
-      @@registry = {
-        :leaky_bucket => ::FineTune::Strategies::LeakyBucket,
-        :sliding_window => ::FineTune::Strategies::SlidingWindow
-      }
-
       def compare?(count, options)
         count <=> options[:limit]
       end
@@ -30,10 +25,6 @@ module FineTune
 
       def reset(key, options)
         raise "not defined"
-      end
-
-      def self.registry
-        @@registry
       end
     end
   end
