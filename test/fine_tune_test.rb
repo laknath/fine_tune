@@ -32,24 +32,46 @@ describe FineTune::Base do
   end
 
   describe "throttling events" do
-    i_suck_and_my_tests_are_order_dependent!
-
     before do
-      FineTune::Strategies::Base.stubs(:registry).returns(
-          {:sample => FineTune::Strategies::SampleStrategy})
+      FineTune::Base.stubs(:registry).
+                returns({:sample => FineTune::Strategies::SampleStrategy})
     end
 
     it "should not need defaults to be setup" do
-      throttled = FineTune.throttle(:email_rate_xyz, 'testxyz@example.com',
+      FineTune::Base.instance.stubs(:limits).returns({})
+      assert FineTune.throttle(:email_rate, 'frodo@example.com',
                               {limit: 10, window: 3600, strategy: :sample})
-      assert throttled
     end
 
-    it "accepts limit threshold" do
+    it "should override defaults" do
+      FineTune.add_limit(:email_rate, {limit: 20, window: 1800})
+      FineTune::Strategies::SampleStrategy.instance.expects(:compare?).
+                with(10, {limit: 5, window: 1800, strategy: :sample}).returns(1).once
+      FineTune.throttle(:email_rate, 'frodo@example.com',
+                              {limit: 5, strategy: :sample})
+    end
+
+    it "can pass a block" do
+      block_called = false
+      FineTune.throttle(:email_rate, 'frodo@example.com',
+              {limit: 5, strategy: :sample}) { block_called = true }
+      assert block_called
+    end
+  end
+
+  describe "throttle!" do
+    before do
+      FineTune::Base.stubs(:registry).
+                returns({:sample => FineTune::Strategies::SampleStrategy})
+    end
+  end
+
+  describe "strategy" do
+    it "should return default strategy if strategy is invalid" do
       flunk
     end
 
-    it "accepts window option" do
+    it "should return default strategy if strategy is nil" do
       flunk
     end
 
@@ -57,15 +79,9 @@ describe FineTune::Base do
       flunk
     end
 
-    it "can pass a block" do
+    it "raises resource key undefined if invalidated" do
       flunk
     end
-  end
-
-  describe "throttle!" do
-  end
-
-  describe "strategy" do
   end
 
   describe "adaptor" do
