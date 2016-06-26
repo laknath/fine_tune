@@ -1,23 +1,40 @@
 module FineTune
   module Strategies
     class Base
+      include Singleton
+
       @@registry = {
-        :leaky_bucket => FineTune::Strategies.LeakyBucket,
-        :sliding_window => FineTune::Strategies.SlidingWindow
+        :leaky_bucket => ::FineTune::Strategies::LeakyBucket,
+        :sliding_window => ::FineTune::Strategies::SlidingWindow
       }
-    end
 
-    def compare(resource_id, limits)
-    end
+      def compare?(count, options)
+        count <=> options[:limit]
+      end
 
-    def increment(resource_id)
-    end
+      def build_key(name, id, options)
+        [name, id].flatten.join('-')
+      end
 
-    def count(resource_id)
-    end
+      def increment(key, options)
+        raise "not defined"
+      end
 
-    def self.registry
-      @@registry
+      def count(key, options)
+        raise "not defined"
+      end
+
+      def validate?(options)
+        false
+      end
+
+      def reset(key, options)
+        raise "not defined"
+      end
+
+      def self.registry
+        @@registry
+      end
     end
   end
 end
