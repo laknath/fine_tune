@@ -15,7 +15,7 @@ module FineTune
       count = strategy.increment(key, options)
       comp = strategy.compare?(count, options)
 
-      yield(count, key, strategy, options) if block_given?
+      yield(count, comp, key, strategy, options) if block_given?
 
       comp >= 0
     end
@@ -23,9 +23,10 @@ module FineTune
     def throttle!(name, id, options)
       block = Proc.new if block_given?
 
-      throttled(name, id, options) do |count, key, strategy, options|
-        block.call(count, key, strategy, options) if block
-        throw MaxRateError.new(key, count, strategy, options)
+      throttle(name, id, options) do |count, comp, key, strategy, options|
+        block.call(count, comp, key, strategy, options) if block
+
+        raise MaxRateError.new(key, count, comp, strategy, options) if comp >= 0
       end
     end
 

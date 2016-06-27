@@ -1,10 +1,11 @@
 module FineTune
   class MaxRateError < StandardError
-    attr_accessor :key, :count, :strategy, :options  
+    attr_accessor :key, :comparison, :count, :strategy, :options  
 
-    def initialize(key, count, strategy, options)
+    def initialize(key, count, comp, strategy, options)
       @key = key
       @count = count
+      @comparison = comp
       @strategy = strategy
       @options = options
 

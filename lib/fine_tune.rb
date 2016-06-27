@@ -5,6 +5,7 @@ Dir[File.dirname(__FILE__) + "/fine_tune/strategies/*.rb"].each do |filename|
   require filename unless strategy == 'base'
 end
 require "fine_tune/base"
+require "fine_tune/max_rate_error"
 
 module FineTune
   class << self
