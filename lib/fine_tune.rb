@@ -1,4 +1,6 @@
 require "fine_tune/version"
+require 'singleton'
+require "forwardable"
 require "fine_tune/strategies/base"
 Dir[File.dirname(__FILE__) + "/fine_tune/strategies/*.rb"].each do |filename|
   require filename
