@@ -1,8 +1,7 @@
 require "fine_tune/version"
 require "fine_tune/strategies/base"
 Dir[File.dirname(__FILE__) + "/fine_tune/strategies/*.rb"].each do |filename|
-  strategy = File.basename(filename, ".rb") 
-  require filename unless strategy == 'base'
+  require filename
 end
 require "fine_tune/base"
 require "fine_tune/max_rate_error"
