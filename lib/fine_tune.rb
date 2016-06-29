@@ -11,8 +11,10 @@ require "fine_tune/max_rate_error"
 module FineTune
   class << self
     extend Forwardable
-    def_delegators :"FineTune::Base.instance", :adapter, :adapter=, :count,
-                    :reset, :throttle, :throttle!, :add_limit, :remove_limit, :rate_exceeded?
+    def_delegators :"FineTune::Base.instance", :count, :reset, :throttle, 
+                    :throttle!, :add_limit, :remove_limit, :rate_exceeded?
+    def_delegators :"FineTune::Base", :adapter, :adapter=, :default_strategy,
+                    :default_strategy=
   end
 end
 

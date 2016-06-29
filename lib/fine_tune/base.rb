@@ -2,7 +2,7 @@ module FineTune
   class Base
     include Singleton
 
-    class << self; attr_accessor :default_strategy; end
+    class << self; attr_accessor :default_strategy, :adapter; end
 
     @@registry = {
       :leaky_bucket => ::FineTune::Strategies::LeakyBucket,
