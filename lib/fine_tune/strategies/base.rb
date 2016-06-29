@@ -8,7 +8,11 @@ module FineTune
       end
 
       def build_key(name, id, options)
-        [name, id].flatten.join('-')
+        [name, identifier, id].flatten.join('-')
+      end
+
+      def identifier
+        raise "not defined"
       end
 
       def increment(key, options)

@@ -8,6 +8,10 @@ module FineTune
       def validate?(options)
         true
       end
+
+      def identifier
+        :sample
+      end
     end
   end
 end
