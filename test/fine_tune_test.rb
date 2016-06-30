@@ -102,11 +102,13 @@ describe FineTune::Base do
 
     it "can pass a block" do
       block_called = false
+      count = nil
       assert_raises FineTune::MaxRateError do 
         FineTune.throttle!(:email_rate, 'frodo@example.com',
-              {limit: 5, strategy: :sample}) { block_called = true }
+            {limit: 5, strategy: :sample}) {|c| block_called = true; count = c }
       end
       assert block_called
+      assert_equal 10, count
     end
 
     it "raises an max rate error when compared greater than the limit" do

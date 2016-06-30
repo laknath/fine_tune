@@ -21,10 +21,8 @@ module FineTune
     end
 
     def throttle!(name, id, options)
-      block = Proc.new if block_given?
-
       throttle(name, id, options) do |count, comp, key, strategy, options|
-        block.call(count, comp, key, strategy, options) if block
+        yield count, comp, key, strategy, options if block_given?
 
         raise MaxRateError.new(key, count, comp, strategy, options) if comp >= 0
       end
