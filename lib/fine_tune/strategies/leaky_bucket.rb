@@ -6,10 +6,6 @@ module FineTune
         attr_accessor :default_window, :default_average, :default_maximum
       end
 
-      @default_interval = 3600 #one hour
-      @default_maximum  = 30
-      @default_average  = 25
-
       def compare?(count, options)
         count <=> average(options)
       end
@@ -26,14 +22,23 @@ module FineTune
           zero_counts
         end
 
-        loss = loss(Time.now.to_i, resource.timestamp, average(options),
+        loss = loss(Time.now.to_i, resource[:timestamp], average(options),
                     window(options))
-        count = resource.count - loss
+        count = resource[:count] - loss
         count > 0 ? count : 0
       end
 
       def validate?(options)
-        true
+        super(options)
+        window, average, maximum = window(options), average(options), maximum(options)
+
+        if !positive_integer?(window)
+          raise ArgumentError.new("time window must be a positive integer")
+        elsif !non_negative_numeric?(maximum) || !non_negative_numeric(average)
+          raise ArgumentError.new("maximum and average should be non negative numbers")
+        elsif maximum < average
+          raise ArgumentError.new("maximum should not be less than the average")
+        end
       end
 
       def reset(key, options)
@@ -44,16 +49,12 @@ module FineTune
         :leaky_bucket
       end
 
-      private
-      def adapter(adapter)
-        adapter || FineTune.adapter
-      end
-
       def loss(now, last_accessed, average, window)
         loss = ((now - last_accessed) * average).to_f/window
         loss > 0 ? loss : 0
       end
 
+      private
       def zero_counts
         {count: 0, timestamp: Time.now.to_i}
       end
@@ -68,6 +69,14 @@ module FineTune
 
       def maximum(options)
         options[:maximum] || self.class.default_maximum
+      end
+
+      def positive_integer?(e)
+        e.is_a?(Integer) && e > 0
+      end
+
+      def non_negative_numeric?(e)
+        e.is_a?(Numeric) && e >= 0
       end
     end
   end
