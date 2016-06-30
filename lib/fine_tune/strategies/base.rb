@@ -8,7 +8,7 @@ module FineTune
       end
 
       def build_key(name, id, options)
-        [name, identifier, id].flatten.join('-')
+        [:fine_tune, name, identifier, id].flatten.join('/')
       end
 
       def adapter

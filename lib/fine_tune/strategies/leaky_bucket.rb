@@ -7,7 +7,7 @@ module FineTune
       end
 
       def compare?(count, options)
-        count <=> average(options)
+        count <=> maximum(options)
       end
 
       def increment(key, options)
@@ -32,13 +32,17 @@ module FineTune
         super(options)
         window, average, maximum = window(options), average(options), maximum(options)
 
-        if !positive_integer?(window)
+        if !window || !average || !maximum
+          raise ArgumentError.new("window, average and maximum options are required")
+        elsif !positive_integer?(window)
           raise ArgumentError.new("time window must be a positive integer")
-        elsif !non_negative_numeric?(maximum) || !non_negative_numeric(average)
-          raise ArgumentError.new("maximum and average should be non negative numbers")
+        elsif !non_negative_numeric?(average)
+          raise ArgumentError.new("average should be non negative numbers")
         elsif maximum < average
           raise ArgumentError.new("maximum should not be less than the average")
         end
+
+        true
       end
 
       def reset(key, options)
@@ -64,11 +68,11 @@ module FineTune
       end
 
       def average(options)
-        options[:average] || options[:limit] || self.class.default_average
+        options[:average] || self.class.default_average
       end
 
       def maximum(options)
-        options[:maximum] || self.class.default_maximum
+        options[:maximum] || options[:limit] || self.class.default_maximum
       end
 
       def positive_integer?(e)

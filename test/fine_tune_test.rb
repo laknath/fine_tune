@@ -164,7 +164,4 @@ describe FineTune::Base do
       assert_equal 'resource key undefined', error.message
     end
   end
-
-  describe "adaptor" do
-  end
 end
