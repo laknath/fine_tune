@@ -11,6 +11,10 @@ module FineTune
         [name, identifier, id].flatten.join('-')
       end
 
+      def adapter
+        FineTune.adapter
+      end
+
       def identifier
         raise "not defined"
       end
@@ -24,7 +28,11 @@ module FineTune
       end
 
       def validate?(options)
-        false
+        if adapter.nil?
+          raise "no adapter given"
+        end
+
+        true
       end
 
       def reset(key, options)
