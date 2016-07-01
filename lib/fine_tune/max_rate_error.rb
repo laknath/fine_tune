@@ -1,4 +1,5 @@
 module FineTune
+  # MaxRateError is thrown when a defined limit has reached
   class MaxRateError < StandardError
     attr_accessor :key, :comparison, :count, :strategy, :options  
 
