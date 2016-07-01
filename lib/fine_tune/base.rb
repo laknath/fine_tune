@@ -17,17 +17,17 @@ module FineTune
     include Singleton
 
     class << self; 
-      # Used to set a strategy for all calls.
+      # Used to set a default strategy for all calls.
       attr_accessor :default_strategy
 
       # Used to set the external data store.
       attr_accessor :adapter
 
-      def registry
+      def registry #:nodoc:
         @@registry
       end
 
-      def find_strategy(strategy)
+      def find_strategy(strategy) #:nodoc:
         registry.fetch(strategy, default_strategy).instance
       end
     end
@@ -75,7 +75,7 @@ module FineTune
     end
 
     # The more forceful variant of throttle. Will raise a MaxRateError if the 
-    # defined threshold is exceeded.
+    # defined threshold is exceeds.
     #
     # Attributes and options are same as for +throttle+.
 
@@ -87,36 +87,59 @@ module FineTune
       end
     end
 
+    # Returns true if current count exceeds the given limits.
+    #
+    # Attributes and options are same as for +throttle+.
     def rate_exceeded?(name, id, options)
       strategy, key, options = current_strategy(name, id, options)
       strategy.compare?(strategy.count(key, options), options) >= 0
     end
 
+    # Returns the current event count.
+    #
+    # Attributes and options are same as for +throttle+.
     def count(name, id, options)
       strategy, key, options = current_strategy(name, id, options)
       strategy.count(key, options)
     end
 
+    # Resets the counter for the given resource identifer to 0.
+    #
+    # Attributes and options are same as for +throttle+.
     def reset(name, id, options)
       strategy, key, options = current_strategy(name, id, options)
       strategy.reset(key, options)
     end
 
+    # Adds a preconfigured rule and options to the rule. These configs 
+    # can be overridden by passing different option values later when
+    # calling +throttle+.
+    #
+    # ==== Attributes
+    #
+    # * +name+ - Name of the rule ie: emails_sent
+    # * +options+ - Default options for the rule
+    #
+    # ==== Examples
+    #   FineTune.add_limit(:emails_sent_per_hour, {window: 3600})
+    #
     def add_limit(name, options = {})
       limits[name] ||= {}
       limits[name].merge!(options)
     end
 
+    # Removes a preconfigured rule and options.
     def remove_limit(name)
       limits.delete(name)
     end
 
+    # Returns all default limits defined
     def limits
       @limits ||= {}
     end
 
     private
-    def current_strategy(name, id, options)
+    def current_strategy(name, id, options) #:nodoc:
       options = (limits[name] || {}).merge(options)
       strategy = self.class.find_strategy(options[:strategy])
 
