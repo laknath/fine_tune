@@ -1,3 +1,8 @@
+#
+# Author:: Laknath Semage (blaknath at gmail dot com)
+# Copyright:: Copyright (c) 2016 Vesess Inc.
+# License:: MIT License
+
 require "fine_tune/version"
 require 'singleton'
 require "forwardable"
@@ -7,6 +12,11 @@ Dir[File.dirname(__FILE__) + "/fine_tune/strategies/*.rb"].each do |filename|
 end
 require "fine_tune/base"
 require "fine_tune/max_rate_error"
+
+##
+# FineTune helps throttle any kind of event sequence. It also supports 
+# custom throttling strategies using a common API. By default
+# it supports LeakyBucket[https://en.wikipedia.org/wiki/Leaky_bucket] algorithm.
 
 module FineTune
   class << self

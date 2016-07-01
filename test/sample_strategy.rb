@@ -1,4 +1,4 @@
-module FineTune
+module FineTune #:nodoc: all
   module Strategies
     class SampleStrategy < Base
       def increment(key, options)
