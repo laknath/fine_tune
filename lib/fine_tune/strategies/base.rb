@@ -1,5 +1,11 @@
 module FineTune
   module Strategies
+    # This class is only for the purpose of extending and implementing
+    # own strategies. Any subclass should implement:
+    # * +identifier+
+    # * +increment+
+    # * +count+
+    # * +reset+
     class Base
       include Singleton
 
