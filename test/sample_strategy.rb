@@ -5,6 +5,10 @@ module FineTune #:nodoc: all
         10
       end
 
+      def count(key, options)
+        9
+      end
+
       def validate?(options)
         true
       end

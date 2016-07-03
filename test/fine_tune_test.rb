@@ -1,10 +1,11 @@
 require 'test_helper'
 
 describe FineTune::Base do
-  it "returns a version number" do
-    refute_nil ::FineTune::VERSION
+  before do
+    FineTune::Base.stubs(:registry).
+          returns({:sample => FineTune::Strategies::SampleStrategy})
   end
-
+  
   describe "setting up default limits" do
     before do
       FineTune.add_limit(:hourly_emails, window: 1, threshold: 10)
@@ -32,11 +33,6 @@ describe FineTune::Base do
   end
 
   describe "throttle" do
-    before do
-      FineTune::Base.stubs(:registry).
-                returns({:sample => FineTune::Strategies::SampleStrategy})
-    end
-
     it "should not need defaults to be setup" do
       FineTune::Base.instance.stubs(:limits).returns({})
       assert FineTune.throttle(:email_rate, 'frodo@example.com',
@@ -75,11 +71,6 @@ describe FineTune::Base do
   end
 
   describe "throttle!" do
-    before do
-      FineTune::Base.stubs(:registry).
-                returns({:sample => FineTune::Strategies::SampleStrategy})
-    end
-
     it "should not need defaults to be setup" do
       FineTune::Base.instance.stubs(:limits).returns({})
 
@@ -111,7 +102,7 @@ describe FineTune::Base do
       assert_equal 10, count
     end
 
-    it "raises an max rate error when compared greater than the limit" do
+    it "raises a max rate error when compared greater than the limit" do
       assert_raises FineTune::MaxRateError do 
         FineTune.throttle!(:email_rate, 'frodo@example.com',
                               {limit: 9, window: 3600, strategy: :sample})
@@ -131,12 +122,41 @@ describe FineTune::Base do
     end
   end
 
-  describe "strategy" do
-    before do
-      FineTune::Base.stubs(:registry).
-                returns({:sample => FineTune::Strategies::SampleStrategy})
+  describe "rate_exceeded" do
+    it "returns false if rate is not exceeded" do
+      refute FineTune.rate_exceeded?(:email_rate, 'frodo@example.com',
+                              {limit: 10, window: 3600, strategy: :sample})
     end
 
+    it "returns true if rate exceeded" do
+      assert FineTune.rate_exceeded?(:email_rate, 'frodo@example.com',
+                              {limit: 8, window: 3600, strategy: :sample})
+    end
+
+    it "returns true if rate is equal to the threshold" do
+      assert FineTune.rate_exceeded?(:email_rate, 'frodo@example.com',
+                              {limit: 9, window: 3600, strategy: :sample})
+    end
+  end
+
+  describe "count" do
+    it "returns the count" do
+      assert_equal 9, FineTune.count(:email_rate, 'frodo@example.com',
+                              {limit: 9, window: 3600, strategy: :sample})
+    end
+  end
+
+  describe "reset" do
+    it "calls the reset of the strategy" do
+      FineTune::Strategies::SampleStrategy.instance.expects(:reset)
+          .with('fine_tune/email_rate/sample/frodo@example.com', 
+                {limit: 9, window: 3600, strategy: :sample})
+      FineTune.reset(:email_rate, 'frodo@example.com',
+                              {limit: 9, window: 3600, strategy: :sample})
+    end
+  end
+
+  describe "strategy" do
     it "should return default strategy if strategy is invalid" do
       assert_equal FineTune::Base.default_strategy.instance,
                             FineTune::Base.find_strategy(:something)
