@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/laknath/fine_tune.svg?branch=master)](https://travis-ci.org/laknath/fine_tune)
+
 # FineTune - a flexible rate limiting/monitoring library
 
 FineTune can be used to limit the rate of any given activity/event 
