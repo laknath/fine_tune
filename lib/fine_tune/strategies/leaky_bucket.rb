@@ -66,17 +66,20 @@ module FineTune
       # Options are same as +increment+
       def validate?(options)
         super(options)
+        error = nil
         window, average, maximum = window(options), average(options), maximum(options)
 
-        if !window || !average || !maximum
-          raise ArgumentError.new("window, average and maximum options are required")
+        error = if !window || !average || !maximum
+          "window, average and maximum options are required"
         elsif !positive_integer?(window)
-          raise ArgumentError.new("time window must be a positive integer")
+          "time window must be a positive integer"
         elsif !non_negative_numeric?(average)
-          raise ArgumentError.new("average should be non negative numbers")
+          "average should be non negative numbers"
         elsif maximum < average
-          raise ArgumentError.new("maximum should not be less than the average")
+          "maximum should not be less than the average"
         end
+
+        raise ArgumentError.new(error) if error
 
         true
       end
