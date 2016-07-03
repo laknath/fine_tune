@@ -80,10 +80,10 @@ module FineTune
     # Attributes and options are same as for +throttle+.
 
     def throttle!(name, id, options)
-      throttle(name, id, options) do |count, comp, key, strategy, options|
-        yield count, comp, key, strategy, options if block_given?
+      throttle(name, id, options) do |count, comp, key, strategy, opts|
+        yield count, comp, key, strategy, opts if block_given?
 
-        raise MaxRateError.new(key, count, comp, strategy, options) if comp >= 0
+        raise MaxRateError.new(key, count, comp, strategy, opts) if comp >= 0
       end
     end
 
