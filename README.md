@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/laknath/fine_tune.svg?branch=master)](https://travis-ci.org/laknath/fine_tune)
+[![Gem Version](https://badge.fury.io/rb/fine_tune.svg)](https://badge.fury.io/rb/fine_tune)
 
 # FineTune - a flexible rate limiting/monitoring library
 
