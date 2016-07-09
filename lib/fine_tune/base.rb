@@ -64,7 +64,7 @@ module FineTune
     #       # some calculation ...
     #     end
 
-    def throttle(name, id, options)
+    def throttle(name, id, options = {})
       strategy, key, options = current_strategy(name, id, options)
       count = strategy.increment(key, options)
       comp = strategy.compare?(count, options)
@@ -79,7 +79,7 @@ module FineTune
     #
     # Attributes and options are same as for +throttle+.
 
-    def throttle!(name, id, options)
+    def throttle!(name, id, options = {})
       throttle(name, id, options) do |count, comp, key, strategy, opts|
         yield count, comp, key, strategy, opts if block_given?
 
@@ -90,7 +90,7 @@ module FineTune
     # Returns true if current count exceeds the given limits.
     #
     # Attributes and options are same as for +throttle+.
-    def rate_exceeded?(name, id, options)
+    def rate_exceeded?(name, id, options = {})
       strategy, key, options = current_strategy(name, id, options)
       strategy.compare?(strategy.count(key, options), options) >= 0
     end
@@ -98,7 +98,7 @@ module FineTune
     # Returns the current event count.
     #
     # Attributes and options are same as for +throttle+.
-    def count(name, id, options)
+    def count(name, id, options = {})
       strategy, key, options = current_strategy(name, id, options)
       strategy.count(key, options)
     end
@@ -106,7 +106,7 @@ module FineTune
     # Resets the counter for the given resource identifer to 0.
     #
     # Attributes and options are same as for +throttle+.
-    def reset(name, id, options)
+    def reset(name, id, options = {})
       strategy, key, options = current_strategy(name, id, options)
       strategy.reset(key, options)
     end
