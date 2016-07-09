@@ -26,7 +26,8 @@ module FineTune
       end
 
       def increment(key, options)
-        raise "not defined"
+        count(key, options) +
+          (options && options[:step] || 1)
       end
 
       def count(key, options)

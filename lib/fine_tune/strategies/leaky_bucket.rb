@@ -39,8 +39,8 @@ module FineTune
       # * +:average+ - can be used to override default_average ie: 10
       # * +:window+ - can be used to override default_window  ie: 3600 (one hour)
       def increment(key, options)
-        count = count(key, options)
-        count = [maximum(options), count + 1].min
+        count = super(key, options)
+        count = [maximum(options), count].min
         adapter.write(key, {count: count, timestamp: Time.now.to_i})
         count
       end

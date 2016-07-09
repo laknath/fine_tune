@@ -16,12 +16,28 @@ describe FineTune::Strategies::LeakyBucket do
       assert_equal saved, FineTune.adapter.read(:my_email_rate)
     end
 
-    it "returns the incremented count after first time" do
+    it "returns the initial count + step size" do
+      saved = {count: 5, timestamp: @time.to_i}
+      assert_equal 5, @leaky_bucket.increment(:my_email_rate,
+                          {average: 10, window: 500, maximum: 20, step: 5})
+      assert_equal saved, FineTune.adapter.read(:my_email_rate)
+    end
+
+    it "returns the incremented count + 1 after first time" do
       FineTune.adapter.write(:my_email_rate, {count: 7, timestamp: @time.to_i - 250})
       assert_equal 3, @leaky_bucket.increment(:my_email_rate,
                           {average: 10, window: 500, maximum: 20})
 
       saved = {count: 3, timestamp: @time.to_i}
+      assert_equal saved, FineTune.adapter.read(:my_email_rate)
+    end
+
+    it "returns the incremented count using step after first time" do
+      FineTune.adapter.write(:my_email_rate, {count: 7, timestamp: @time.to_i - 250})
+      assert_equal 6, @leaky_bucket.increment(:my_email_rate,
+                          {average: 10, window: 500, maximum: 20, step: 4})
+
+      saved = {count: 6, timestamp: @time.to_i}
       assert_equal saved, FineTune.adapter.read(:my_email_rate)
     end
 
