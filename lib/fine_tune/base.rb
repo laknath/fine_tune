@@ -65,6 +65,7 @@ module FineTune
     #     end
 
     def throttle(name, id, options = {})
+      options[:validate] = true
       strategy, key, options = current_strategy(name, id, options)
       count = strategy.increment(key, options)
       comp = strategy.compare?(count, options)
@@ -143,7 +144,7 @@ module FineTune
       options = (limits[name] || {}).merge(options)
       strategy = self.class.find_strategy(options[:strategy])
 
-      if strategy.validate?(options)
+      if !options.delete(:validate) || strategy.validate?(options)
         key = strategy.build_key(name, id, options)
       end
 
